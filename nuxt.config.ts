@@ -25,7 +25,7 @@ export default defineNuxtConfig({
       siteUrl: 'http://localhost:5176',
       siteName: '予初作文',
       siteDescription:
-        '单元指导、习作范文与素材积累，结构清晰、随时可查。完整收藏与资料下载请在微信小程序中使用。',
+        'AI批改,单元指导、习作范文与素材积累，结构清晰、随时可查。完整收藏与资料下载请在微信小程序中使用。',
     },
   },
   app: {
