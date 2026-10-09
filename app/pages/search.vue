@@ -205,15 +205,20 @@ useSiteSeo({
               v-if="item.coverImg"
               class="hidden h-16 w-24 shrink-0 overflow-hidden rounded-xl bg-parchment-200 sm:block"
             >
-              <img
-                :src="item.coverImg"
-                :alt="item.title"
-                width="96"
-                height="64"
-                class="h-full w-full object-cover"
-                loading="lazy"
-                decoding="async"
-              />
+	            <NuxtPicture
+			            provider="aliyunoss"
+			            :src="item.coverImg"
+			            :alt="item.title"
+			            width="200"
+			            height="140"
+			            :modifiers="{ width: 200, quality: 80 }"
+			            format="webp"
+			            sizes="96px"
+			            class="h-full w-full object-cover"
+			            loading="lazy"
+			            decoding="async"
+	            />
+
             </div>
             <div class="min-w-0 flex-1">
               <div class="mb-1 flex flex-wrap items-center gap-2">

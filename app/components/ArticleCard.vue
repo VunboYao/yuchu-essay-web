@@ -3,10 +3,22 @@ import { computed } from 'vue'
 import type { ArticleSummary, EssaySummary } from '~/types/content'
 import { articleMeta } from '~/utils/nav'
 
-const props = defineProps<{
-  kind: 'article' | 'essay'
-  item: ArticleSummary | EssaySummary
-}>()
+const props = withDefaults(
+  defineProps<{
+    kind: 'article' | 'essay'
+    item: ArticleSummary | EssaySummary
+    // 首屏 LCP 候选图：立即加载并注入高优先级 preload；其余图片懒加载
+    priority?: boolean
+    // 响应式显示宽度提示，决定浏览器从 srcset 选哪一档。
+    // 默认对应 1/2/3 列网格（sm:2 列、lg:3 列）；纯 2 列网格传 '320:100vw sm:50vw lg:474px'。
+    sizes?: string
+  }>(),
+  {
+    priority: false,
+    // <640 单列 100vw；640~1023 两列 50vw；≥1024 容器封顶后三列约 312px
+    sizes: '320:100vw sm:50vw lg:312px',
+  },
+)
 
 const to = computed(() =>
   props.kind === 'article' ? `/articles/${props.item.id}` : `/essays/${props.item.id}`,
@@ -34,15 +46,20 @@ const ctaLabel = computed(() => (props.kind === 'essay' ? '读范文' : '阅读'
 <template>
   <NuxtLink :to="to" class="article-card group">
     <div v-if="article?.coverImg" class="article-card-media">
-      <img
+	    <NuxtPicture
+        provider="aliyunoss"
         :src="article.coverImg"
         :alt="item.title"
         width="640"
         height="360"
+        :modifiers="{ width: 640, quality: 80 }"
+        format="webp"
+        :sizes="sizes"
         class="article-card-img"
-        loading="lazy"
+        :loading="priority ? 'eager' : 'lazy'"
+        :preload="priority ? { fetchPriority: 'high' } : false"
         decoding="async"
-      />
+	    />
       <span class="article-card-media-veil" aria-hidden="true" />
     </div>
     <div v-else-if="essay" class="article-card-essay-mark" aria-hidden="true">

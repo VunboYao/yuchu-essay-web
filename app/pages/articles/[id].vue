@@ -124,15 +124,20 @@ useSiteSeo({
       </div>
 
       <div v-if="article.bodyImages?.length" class="mt-8 space-y-3">
-        <img
-          v-for="(src, idx) in article.bodyImages"
-          :key="`${src}-${idx}`"
-          :src="src"
-          :alt="`${article.title} · 图 ${idx + 1}`"
-          class="w-full rounded-xl border border-border/40 bg-parchment-card"
-          loading="lazy"
-          decoding="async"
-        />
+	      <NuxtPicture
+			      v-for="(src, idx) in article.bodyImages"
+			      :key="`${src}-${idx}`"
+			      provider="aliyunoss"
+			      :src="src"
+			      :alt="`${article.title} · 图 ${idx + 1}`"
+			      :modifiers="{ width: 1080, quality: 80 }"
+			      format="webp"
+			      sizes="sm:100vw md:720px"
+			      class="w-full rounded-xl border border-border/40 bg-parchment-card"
+			      loading="lazy"
+			      decoding="async"
+	      />
+
       </div>
       <div
         v-else
@@ -160,14 +165,26 @@ useSiteSeo({
       <section v-if="essays.length" class="mt-10">
         <h2 class="font-display text-lg font-semibold text-ink-900">优秀作文</h2>
         <div class="mt-3 grid gap-3 sm:grid-cols-2">
-          <ArticleCard v-for="e in essays" :key="e.id" kind="essay" :item="e" />
+          <ArticleCard
+            v-for="e in essays"
+            :key="e.id"
+            kind="essay"
+            :item="e"
+            sizes="320:100vw sm:50vw lg:474px"
+          />
         </div>
       </section>
 
       <section v-if="related.length" class="mt-10">
         <h2 class="font-display text-lg font-semibold text-ink-900">相关推荐</h2>
         <div class="mt-3 grid gap-3 sm:grid-cols-2">
-          <ArticleCard v-for="a in related" :key="a.id" kind="article" :item="a" />
+          <ArticleCard
+            v-for="a in related"
+            :key="a.id"
+            kind="article"
+            :item="a"
+            sizes="320:100vw sm:50vw lg:474px"
+          />
         </div>
       </section>
 

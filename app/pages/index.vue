@@ -208,16 +208,21 @@ useSiteSeo({
             :to="mapMiniPathToWeb(block.path, linkGrade || undefined)"
             class="group flex cursor-pointer flex-col items-center gap-2 rounded-2xl border border-border bg-parchment-card p-4 text-center transition duration-300 ease-out hover:-translate-y-1 hover:border-jade-500 hover:bg-jade-soft/50 hover:shadow-[0_10px_24px_-12px_rgba(45,106,79,0.3)]"
           >
-            <img
-              v-if="block.icon"
-              :src="block.icon"
-              :alt="block.title"
-              width="40"
-              height="40"
-              class="h-10 w-10 rounded-xl object-cover transition duration-300 ease-out group-hover:scale-110 group-hover:shadow-sm"
-              loading="lazy"
-              decoding="async"
-            />
+	          <NuxtPicture
+			          v-if="block.icon"
+			          provider="aliyunoss"
+			          :src="block.icon"
+			          :alt="block.title"
+			          width="80"
+			          height="80"
+			          :modifiers="{ width: 80, quality: 80 }"
+			          format="webp"
+			          sizes="40px"
+			          class="h-10 w-10 rounded-xl object-cover transition duration-300 ease-out group-hover:scale-110 group-hover:shadow-sm"
+			          loading="lazy"
+			          decoding="async"
+	          />
+
             <p class="font-medium text-ink-900 transition-colors duration-200 group-hover:text-jade-700">
               {{ block.title }}
             </p>
@@ -243,10 +248,11 @@ useSiteSeo({
         </div>
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <ArticleCard
-            v-for="item in recommended"
+            v-for="(item, index) in recommended"
             :key="item.id"
             kind="article"
             :item="item"
+            :priority="index === 0"
           />
         </div>
       </section>
@@ -260,7 +266,13 @@ useSiteSeo({
           </NuxtLink>
         </div>
         <div class="grid gap-3 sm:grid-cols-2">
-          <ArticleCard v-for="item in hot" :key="item.id" kind="article" :item="item" />
+          <ArticleCard
+            v-for="item in hot"
+            :key="item.id"
+            kind="article"
+            :item="item"
+            sizes="320:100vw sm:50vw lg:474px"
+          />
         </div>
       </section>
 
@@ -273,7 +285,13 @@ useSiteSeo({
           </NuxtLink>
         </div>
         <div class="grid gap-3 sm:grid-cols-2">
-          <ArticleCard v-for="item in essays" :key="item.id" kind="essay" :item="item" />
+          <ArticleCard
+            v-for="item in essays"
+            :key="item.id"
+            kind="essay"
+            :item="item"
+            sizes="320:100vw sm:50vw lg:474px"
+          />
         </div>
       </section>
 
