@@ -27,6 +27,11 @@ export default defineNuxtConfig({
   },
   vite: {
     plugins: [tailwindcss()],
+    build: {
+      // 全站 CSS 合并为单个文件：首屏 render-blocking 样式请求由 3 个降为 1 个，
+      // 一次 immutable 缓存后全站复用；本站全站 CSS（brotli 后约 6.5KB）很小，适用。
+      cssCodeSplit: false,
+    },
   },
   devServer: {
     port: 5176,
