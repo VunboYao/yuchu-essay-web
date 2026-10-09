@@ -2,7 +2,7 @@
 
 Nuxt 4 混合渲染版本，页面、文案和视觉对齐 [`Website-Vue`](../Website-Vue)。公开阅读继续走 `course_server` 的 C 端 `/api/v1`。收藏、登录、下载签链仍只在小程序完成。
 
-渲染、首页性能和 SEO 的取舍见 [`docs/渲染与性能.md`](./docs/渲染与性能.md)。
+渲染、首页性能和 SEO 的取舍见 [`docs/渲染与性能.md`](./docs/渲染与性能.md)。性能优化做了什么、漏了什么、每个数字怎么量出来的，见 [`docs/ssr-performance-interview.md`](./docs/ssr-performance-interview.md)。
 
 ## 快速开始
 
