@@ -1,8 +1,8 @@
-# Website-Nuxt · 予初作文内容官网
+> **原始中文 README（从私有 monorepo 带出，保留作参考）**
+> 其中的 `Website-Vue`、`course_server` 等相对路径不在本仓库。
+> 英文说明见 [README.md](./README.md)；`docs/` 目录仍是中文。
 
-> **这是从私有 monorepo 里带出来的原始中文 README。**
-> 里面的 `../Website-Vue`、`../course_server` 等相对路径指向**不在本仓库**的目录。
-> 当前可用的说明看英文版 [README.md](./README.md)；`docs/` 目录仍是中文。
+# Website-Nuxt · 予初作文内容官网
 
 Nuxt 4 混合渲染版本，页面、文案和视觉对齐 [`Website-Vue`](../Website-Vue)。公开阅读继续走 `course_server` 的 C 端 `/api/v1`。收藏、登录、下载签链仍只在小程序完成。
 
