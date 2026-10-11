@@ -1,50 +1,137 @@
-# Website-Nuxt · 予初作文内容官网
+# yuchu-essay-web
 
-Nuxt 4 混合渲染版本，页面、文案和视觉对齐 [`Website-Vue`](../Website-Vue)。公开阅读继续走 `course_server` 的 C 端 `/api/v1`。收藏、登录、下载签链仍只在小程序完成。
+Public content website for **予初作文 (Yuchu Essay)** — the web face of a Chinese
+primary-school writing platform. Same content as the WeChat mini program, rendered for
+search engines and for browsers.
 
-渲染、首页性能和 SEO 的取舍见 [`docs/渲染与性能.md`](./docs/渲染与性能.md)。性能优化做了什么、漏了什么、每个数字怎么量出来的，见 [`docs/ssr-performance-interview.md`](./docs/ssr-performance-interview.md)。
+**Nuxt 4 · Vue 3 · Nitro · TypeScript · Tailwind 4**
 
-## 快速开始
+**Live:** https://ssr.vunbo.com
+
+Sibling repositories:
+
+| Repo | What | Stack |
+|---|---|---|
+| [`yuchu-essay-api`](https://github.com/VunboYao/yuchu-essay-api) | The backend this site reads from | Go · Gin · GORM |
+| [`yuchu-essay-admin`](https://github.com/VunboYao/yuchu-essay-admin) | Operations admin panel | React 19 |
+
+> **Documentation note:** [`docs/`](./docs/) is written in Chinese. It contains a full
+> performance write-up — what was measured, what was changed, what the numbers were, and
+> what is still unfixed. It is the most useful folder in this repo if you care about SSR
+> performance.
+
+---
+
+## Rendering strategy: per URL, not one mode for the whole site
+
+The interesting part of this project is not "it uses Nuxt" — it is that each route gets the
+rendering mode that fits its traffic and change rate.
+
+| Route | Mode | Why |
+|---|---|---|
+| `/` | SSR + SWR 60s | Changes with the editorial calendar; a stale minute is fine, a slow first byte is not |
+| `/category` | prerendered at build | The taxonomy changes rarely and the page is a pure function of it |
+| `/articles`, `/essays` | SSR + SWR 120s | Paginated listings; each query string caches independently |
+| `/articles/:id`, `/essays/:id` | SSR + SWR 10 min | The long tail; content is edited rarely and read often |
+| `/search` | prerendered shell, results fetched in the browser | Query-string space is unbounded — SSR-ing it would produce cache churn for no SEO value, so the page is `noindex` |
+| `/download-guide`, `/open-miniprogram` | prerendered at build | Static copy |
+
+10 pages, 7 components, 2 server routes (sitemap, robots), ~3,100 lines.
+
+---
+
+## Caching and transport
+
+- **Cache headers are layered, not one blanket value.** Static assets get a long cache;
+  HTML gets a short `s-maxage`.
+- **Compression is split by origin.** Static output is precompressed by Nitro at build time
+  and served as-is; dynamic responses are compressed by Nginx. Doing both would compress
+  twice.
+- **Images are not proxied.** Instead of routing remote images through Nuxt's image handler,
+  the URL is rewritten so Alibaba Cloud OSS serves a resized variant directly. Proxying
+  would hand the internet a free image-processing service, cost Node CPU and bandwidth, and
+  add a hop — rewriting lets OSS do the resize and benefit from its own cache.
+
+---
+
+## Quickstart
 
 ```bash
-# 1. 启动后端（仓库根下）
-cd course_server && air    # http://localhost:8080
-
-# 2. 启动本站
-cd Website-Nuxt
 pnpm install
-pnpm dev                   # http://localhost:5176
+pnpm dev                 # http://localhost:5176
 ```
 
-其它命令：`pnpm test` · `pnpm typecheck` · `pnpm build` · `pnpm preview`
+The API origin defaults to `http://localhost:8080`, so start the backend first.
 
-构建期会预渲染分类、下载说明、打开小程序和搜索壳，需要能访问 `NUXT_API_ORIGIN`（默认 `http://localhost:8080`）。
+| Variable | Purpose | Default |
+|---|---|---|
+| `NUXT_API_ORIGIN` | Server-side fetch target | `http://localhost:8080` |
+| `NUXT_PUBLIC_API_BASE` | Browser request prefix; Nitro proxies it | `/api/v1` |
+| `NUXT_PUBLIC_SITE_URL` | Absolute site URL for canonical, Open Graph, sitemap | — |
 
-## 分享图
+Browsers never talk to `NUXT_API_ORIGIN` directly — they call same-origin `/api/v1` and
+Nitro proxies it, so the API origin is not exposed to the client.
 
-`public/og-*.png`（1200×630，6 张）是 Open Graph / Twitter Card 用的卡片图，由 `node scripts/generate-og-images.mjs` 生成：本机 Chrome 无头渲染脚本里内联的模板，再用 PIL 压到 128 色。改文案就改脚本里的 `CARD_VARIANTS` 再重跑，不用手搓图。页面没传 `image` 时由 `useSiteSeo` 兜底 `og-default.png`。
+```bash
+pnpm build      # prerenders /category, the static pages, and the latest detail pages
+pnpm preview
+pnpm test       # 7 tests, no backend required
+pnpm typecheck
+```
 
-`og:image` 必须是绝对地址，靠 `NUXT_PUBLIC_SITE_URL` 拼出来——上线前不改这个变量，分享卡片会指向 localhost。
+`pnpm build` needs to reach `NUXT_API_ORIGIN`, because the prerender step fetches real
+content. Building against the public API works:
 
-## 环境变量
+```bash
+NUXT_API_ORIGIN=https://api.vunbo.com \
+NUXT_PUBLIC_SITE_URL=https://ssr.vunbo.com \
+pnpm build
+```
 
-复制 [`.env.example`](./.env.example)。
+---
 
-| 变量 | 作用 |
-|---|---|
-| `NUXT_API_ORIGIN` | 服务端直连的 course_server，默认 `http://localhost:8080` |
-| `NUXT_PUBLIC_API_BASE` | 浏览器请求前缀，默认 `/api/v1`，由 Nitro 反代 |
-| `NUXT_PUBLIC_SITE_URL` | canonical、Open Graph、sitemap 的站点绝对地址 |
+## Social cards
 
-改 `NUXT_API_ORIGIN` 后需要重启，路由代理在启动时读取。
+`public/og-*.png` — six 1200×630 Open Graph images — are generated, not drawn:
 
-## 路由
+```bash
+node scripts/generate-og-images.mjs
+```
 
-| 路径 | 渲染 |
-|---|---|
-| `/` | SWR 60 秒。HTML 是「未选年级」的首页 |
-| `/category` | 构建时预渲染 |
-| `/articles`、`/essays` | SWR 120 秒，查询串各自缓存 |
-| `/articles/:id`、`/essays/:id` | SWR 10 分钟 |
-| `/search` | 预渲染搜索壳，结果只在浏览器请求，`noindex` |
-| `/download-guide`、`/open-miniprogram` | 构建时预渲染 |
+The script renders inline HTML templates in headless Chrome and quantises the result to a
+128-colour palette. Changing the copy means editing `CARD_VARIANTS` in the script and
+re-running it.
+
+`og:image` must be an absolute URL, which `NUXT_PUBLIC_SITE_URL` supplies. Forget to set it
+in production and every share card points at `localhost`.
+
+---
+
+## Known issues
+
+Listed because they are real, not because they are hidden in a backlog nobody reads:
+
+- **`pnpm typecheck` prints a non-fatal plugin error.** `@vue/language-core` probes for
+  `vue-router/volar/sfc-route-blocks`, which `vue-router@4` does not export (it appears in
+  v5). Type errors are still caught correctly and the command exits non-zero on a real
+  error — verified by injecting type errors into both a `.vue` and a `.ts` file. The fix is
+  a vue-router major upgrade, which has not been done.
+- **SSR payload travels in plaintext.** The HTML and its `_payload.json` are not encrypted;
+  this is inherent to the pattern and would need a transport-level answer.
+- **HTML sets `s-maxage` but no `max-age`**, so browser caching is left to heuristics.
+- **`og:image` still points at the original full-size object** rather than a pre-sized card.
+- **The home page's TTFB is blocked by an `await`** that could be streamed.
+- **SWR caches a failed first render** along with successful ones.
+
+The measured baseline and the full list are in
+[`docs/ssr-performance-interview.md`](./docs/ssr-performance-interview.md)
+(Chinese) — including the Lighthouse numbers (performance 96, SEO 99, accessibility 100,
+best practices 100) and the expected effect of each remaining fix.
+
+---
+
+## License
+
+MIT — see [LICENSE](./LICENSE).
+
+The original Chinese README is kept at [`README.zh-CN.md`](./README.zh-CN.md).
