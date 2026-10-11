@@ -5,6 +5,7 @@ const miniOnly = ['微信登录', '收藏与浏览历史', '资料下载（含�
 useSiteSeo({
   title: '下载说明',
   description: '网页提供公开阅读与检索。收藏、登录与资料下载仅在微信小程序中完成。',
+  image: '/og-download-guide.png',
 })
 </script>
 

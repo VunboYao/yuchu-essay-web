@@ -9,9 +9,23 @@ const hint = computed(() =>
   is404.value ? '链接可能已失效，或地址输入有误。' : '请稍后重试。若持续出现，确认 course_server 已启动。',
 )
 
+// 错误页不进索引、不给 canonical（canonical 指到一个 404 地址反而是错的），只补上分享信息
+const config = useRuntimeConfig()
+const siteUrl = String(config.public.siteUrl).replace(/\/$/, '')
+const pageTitle = computed(() => `${title.value} · ${config.public.siteName}`)
+
+// 站名由这里手动拼，关掉 nuxt.config 的 titleTemplate，否则会拼成「… · 予初作文 · 予初作文」
+useHead({ titleTemplate: '%s' })
 useSeoMeta({
-  title: () => `${title.value} · 予初作文`,
+  title: pageTitle,
+  description: hint,
   robots: 'noindex',
+  ogTitle: pageTitle,
+  ogDescription: hint,
+  ogType: 'website',
+  ogSiteName: config.public.siteName,
+  ogImage: `${siteUrl}/og-default.png`,
+  twitterCard: 'summary_large_image',
 })
 
 function goHome() {

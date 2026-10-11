@@ -91,6 +91,7 @@ async function loadMore() {
 useSiteSeo({
   title: resultTitle,
   description: '公开阅读的小学优秀作文，收藏请在微信小程序完成。',
+  image: '/og-essays.png',
 })
 </script>
 

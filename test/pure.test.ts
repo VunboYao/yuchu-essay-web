@@ -3,7 +3,7 @@ import { test } from 'node:test'
 import { buildCategoryTree } from '../app/utils/categoryTree.ts'
 import { cleanQuery, unwrapApiBody, ApiError } from '../app/utils/http.ts'
 import { mapMiniPathToWeb } from '../app/utils/nav.ts'
-import { plainText } from '../app/utils/text.ts'
+import { absoluteSiteUrl, plainText } from '../app/utils/text.ts'
 import type { TaxonomyUnit } from '../app/types/content.ts'
 
 test('素材入口映射到文章列表并保留筛选条件', () => {
@@ -57,4 +57,19 @@ test('解包成功响应并丢掉空查询', () => {
 test('富文本压成有限长度的纯文本', () => {
   assert.equal(plainText('<p>春风&nbsp;又绿</p><p>江南岸</p>'), '春风 又绿 江南岸')
   assert.equal(plainText('一二三四五', 3), '一二…')
+})
+
+test('分享图地址补成绝对路径，脏值丢掉', () => {
+  assert.equal(
+    absoluteSiteUrl('https://essay.example.com/', '/og-articles.png'),
+    'https://essay.example.com/og-articles.png',
+  )
+  assert.equal(
+    absoluteSiteUrl('https://essay.example.com', 'https://cdn.example.com/a.jpg'),
+    'https://cdn.example.com/a.jpg',
+  )
+  // 协议相对、相对路径、空值都不能进 og:image
+  assert.equal(absoluteSiteUrl('https://essay.example.com', '//evil.example.com/x.png'), undefined)
+  assert.equal(absoluteSiteUrl('https://essay.example.com', 'og-articles.png'), undefined)
+  assert.equal(absoluteSiteUrl('https://essay.example.com', undefined), undefined)
 })

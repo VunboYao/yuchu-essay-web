@@ -20,6 +20,12 @@ pnpm dev                   # http://localhost:5176
 
 构建期会预渲染分类、下载说明、打开小程序和搜索壳，需要能访问 `NUXT_API_ORIGIN`（默认 `http://localhost:8080`）。
 
+## 分享图
+
+`public/og-*.png`（1200×630，6 张）是 Open Graph / Twitter Card 用的卡片图，由 `node scripts/generate-og-images.mjs` 生成：本机 Chrome 无头渲染脚本里内联的模板，再用 PIL 压到 128 色。改文案就改脚本里的 `CARD_VARIANTS` 再重跑，不用手搓图。页面没传 `image` 时由 `useSiteSeo` 兜底 `og-default.png`。
+
+`og:image` 必须是绝对地址，靠 `NUXT_PUBLIC_SITE_URL` 拼出来——上线前不改这个变量，分享卡片会指向 localhost。
+
 ## 环境变量
 
 复制 [`.env.example`](./.env.example)。

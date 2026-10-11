@@ -83,6 +83,7 @@ function unitLink(unit: CategoryUnitNode) {
 useSiteSeo({
   title: '教材分类',
   description: '按年级、册次和单元浏览小学语文作文资料。',
+  image: '/og-category.png',
 })
 </script>
 

@@ -8,6 +8,7 @@ const steps = [
 useSiteSeo({
   title: '打开小程序',
   description: '收藏、资料下载与登录请在微信小程序「予初作文」中完成。',
+  image: '/og-open-miniprogram.png',
 })
 </script>
 

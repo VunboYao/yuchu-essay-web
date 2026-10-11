@@ -132,6 +132,7 @@ async function loadMore() {
 useSiteSeo({
   title: resultTitle,
   description: '按年级、册次和单元浏览小学作文文章。',
+  image: '/og-articles.png',
 })
 </script>
 
